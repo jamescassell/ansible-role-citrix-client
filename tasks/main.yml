@@ -27,7 +27,7 @@
       state: absent
   
   - name: extract system CA certs
-    command: trust extract -v --format pem-directory-hash /opt/Citrix/ICAClient/keystore/cacerts
+    command: trust extract {{ citrix_client_trust_args }} -v --format pem-directory-hash /opt/Citrix/ICAClient/keystore/cacerts
   when:
   - citrix_client_system_ca is changed or
     citrix_client_installed is changed
