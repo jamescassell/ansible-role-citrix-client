@@ -27,11 +27,7 @@
       state: absent
   
   - name: extract system CA certs
-    # don't do pem-directory-hash because wfica throws errors/warnings if we don't use ctx_rehash
-    command: trust extract -v --format pem-directory /opt/Citrix/ICAClient/keystore/cacerts
-
-  - name: rehash CA dir
-    command: /opt/Citrix/ICAClient/util/ctx_rehash
+    command: trust extract -v --format pem-directory-hash /opt/Citrix/ICAClient/keystore/cacerts
   when:
   - citrix_client_system_ca is changed or
     citrix_client_installed is changed
