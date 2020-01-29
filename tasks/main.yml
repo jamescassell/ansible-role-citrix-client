@@ -1,0 +1,60 @@
+---
+# tasks file for citrix-client
+
+- name: install dependencies
+  yum:
+    name:
+    - libcanberra-gtk2  # probably optional
+    - compat-openssl10  # because apparently yum is broken w/ a path
+    #- /usr/lib64/libcrypto.so.10  # requires an old openssl version
+
+- name: install Citrix Client
+  yum:
+    name: "{{ citrix_client_packages }}"
+  register: citrix_client_installed
+
+- name: check whether certificates are up to date
+  shell: find /opt/Citrix/ICAClient/keystore/cacerts -maxdepth 0 -not -newer "$(readlink -f /etc/pki/tls/certs/ca-bundle.crt)"
+  check_mode: no
+  register: citrix_client_system_ca
+  changed_when: citrix_client_system_ca.stdout_lines | length
+
+- name: replace CA certs list with system CA certs
+  block:
+  - name: remote cacert dir for system CA update
+    file:
+      path: /opt/Citrix/ICAClient/keystore/cacerts
+      state: absent
+
+  - name: extract system CA certs
+    # don't do pem-directory-hash because wfica throws errors/warnings if we don't use ctx_rehash
+    command: trust extract -v --format pem-directory /opt/Citrix/ICAClient/keystore/cacerts
+
+  - name: rehash CA dir
+    command: /opt/Citrix/ICAClient/util/ctx_rehash
+  when:
+  - citrix_client_system_ca is changed or
+    citrix_client_installed is changed
+
+- name: check whether wfica is a binary
+  command: file -pbe text /opt/Citrix/ICAClient/wfica
+  check_mode: no
+  register: citrix_client_wfica_check
+  changed_when: citrix_client_wfica_check.stdout != "data"
+
+- name: copy wfica to util
+  copy:
+    dest: /opt/Citrix/ICAClient/util/wfica
+    src: /opt/Citrix/ICAClient/wfica
+    remote_src: yes
+    mode: '0755'
+  when: citrix_client_wfica_check is changed
+
+- name: LD_PRELOAD openssl for wfica
+  copy:
+    dest: /opt/Citrix/ICAClient/wfica
+    mode: '0755'
+    content: |
+      #!/bin/bash
+      export LD_PRELOAD=/usr/lib64/libcrypto.so.10
+      exec /opt/Citrix/ICAClient/util/wfica "$@"
