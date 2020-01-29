@@ -10,8 +10,8 @@ Requirements
   installed.
 
 - If the package is already installed, `update-ca-trust` should be run
-  afterwards for this role to install system CA certificates into the Citrix
-  Client trust store.
+  afterwards (or at least sometime after the ICAClient rpm was built) for this
+  role to install system CA certificates into the Citrix Client trust store.
 
 Role Variables
 --------------

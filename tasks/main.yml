@@ -14,7 +14,7 @@
   register: citrix_client_installed
 
 - name: check whether certificates are up to date
-  shell: find /opt/Citrix/ICAClient/keystore/cacerts -maxdepth 0 -not -newer "$(readlink -f /etc/pki/tls/certs/ca-bundle.crt)"
+  shell: find /opt/Citrix/ICAClient/keystore/cacerts -not -newer "$(readlink -f /etc/pki/tls/certs/ca-bundle.crt)"
   check_mode: no
   register: citrix_client_system_ca
   changed_when: citrix_client_system_ca.stdout_lines | length
