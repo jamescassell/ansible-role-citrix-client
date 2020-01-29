@@ -18,6 +18,7 @@ Role Variables
 
 ```
 citrix_client_packages: [ICAClient]  # the path to the .rpm file
+citrix_client_trust_args: ""  # extra args to pass to 'trust extract'
 ```
 
 Dependencies
@@ -31,8 +32,11 @@ Example Playbook
     - hosts: servers
       roles:
       - role: citrix-client
+        # specify custom package mirror location
         citrix_client_packages:
         - https://mirror.example.com/downloads.citrix.com/16914/ICAClient-rhel-19.12.0.19-0.x86_64.rpm
+        # trust only locally-trusted certs, not default CAs
+        citrix_client_trust_args: --filter pkcs11:token=System%20Trust
 
 License
 -------

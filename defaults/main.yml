@@ -4,3 +4,7 @@
 citrix_client_packages:
 - ICAClient
 # - https://downloads.citrix.com/16914/ICAClient-rhel-19.12.0.19-0.x86_64.rpm
+
+citrix_client_trust_args: ""
+# use the example below to trust only non-default CAs
+# citrix_client_trust_args: --filter pkcs11:token=System%20Trust
