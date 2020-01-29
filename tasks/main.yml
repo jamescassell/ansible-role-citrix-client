@@ -38,12 +38,20 @@
   register: citrix_client_wfica_check
   changed_when: citrix_client_wfica_check.stdout != "data"
 
-- name: copy wfica to util
-  copy:
-    dest: /opt/Citrix/ICAClient/util/wfica
-    src: /opt/Citrix/ICAClient/wfica
-    remote_src: yes
-    mode: '0755'
+- name: move wfica binary to util
+  block:
+  - name: copy wfica to util
+    copy:
+      dest: /opt/Citrix/ICAClient/util/wfica
+      src: /opt/Citrix/ICAClient/wfica
+      remote_src: yes
+      mode: '0755'
+
+  - name: symlink so files for moved binary
+    shell: ln -sf ../*.so .
+    args:
+      chdir: /opt/Citrix/ICAClient/util
+      warn: no
   when: citrix_client_wfica_check is changed
 
 - name: LD_PRELOAD openssl for wfica
